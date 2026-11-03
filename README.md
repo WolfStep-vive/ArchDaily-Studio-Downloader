@@ -79,3 +79,16 @@ python -m PyInstaller ArchDaily_Studio_Downloader.spec
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+
+---
+
+## 🙏 Créditos y Reconocimientos / Credits
+
+Este proyecto está inspirado y basado en la idea original de **[Bahram Jannesar](https://github.com/BahramJannesar)** ([ArchdailyProjectDownloader](https://github.com/BahramJannesar/ArchdailyProjectDownloader)).
+
+Agradecimiento especial al autor original por el concepto de recopilación de proyectos. Esta edición (**ArchDaily Studio Downloader**) rediseña y potencia la herramienta con:
+- **Nueva interfaz de usuario:** Diseño moderno de escritorio con estética *Liquid Glass* y experiencia fluida pensada para arquitectos.
+- **Sin Selenium ni ChromeDrivers:** Motor de red directo, ultra ligero y con descargas multihilo simultáneas.
+- **Traducción bilingüe integrada:** Traducción automática de memorias descriptivas al español con botón interactivo de retraducción.
+- **Clasificación inteligente:** Separación de planos técnicos y fotografías en alta resolución.
+- **Distribución portable:** Binario optimizado y firmado para Windows de solo 17 MB.

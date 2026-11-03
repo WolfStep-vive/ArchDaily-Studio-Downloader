@@ -1,4 +1,4 @@
-﻿=====================================================
+=====================================================
  ARCHDAILY STUDIO DOWNLOADER - EDICION PORTABLE v1.0
  Herramienta de investigacion y archivo para Arquitectos
 =====================================================
@@ -30,3 +30,9 @@ Solo debes hacer clic en:
   2. "Ejecutar de todas formas"
 
 El programa es 100% seguro, libre de publicidad y no recopila datos personales.
+
+CREDITOS Y RECONOCIMIENTOS:
+Inspirado y basado en la idea original de Bahram Jannesar:
+https://github.com/BahramJannesar/ArchdailyProjectDownloader
+Desarrollado y redisenado con nueva interfaz Liquid Glass por WolfStep-vive.
+

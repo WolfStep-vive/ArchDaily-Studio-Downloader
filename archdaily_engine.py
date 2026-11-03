@@ -1,6 +1,7 @@
 """
 ArchDaily Studio Engine - Robust scraper and downloader for ArchDaily projects.
-Does not require Selenium or ChromeDriver; uses direct HTTP requests and JSON gallery extraction.
+Originally inspired by the concept from Bahram Jannesar (https://github.com/BahramJannesar/ArchdailyProjectDownloader).
+Redesigned with direct HTTP JSON gallery extraction, multithreaded downloads, and resilient translation.
 """
 
 import os
