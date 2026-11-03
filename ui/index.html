@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArchDaily // Studio Downloader</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <style>
+    /* ==========================================================================
+       ARCHDAILY STUDIO — PURE ARCHITECTURAL MINIMALISM
+       "Weniger, aber besser" — Dieter Rams / Mies van der Rohe / Swiss Grid
+       Strictly Monochromatic: Deep Obsidian (#090a0d), Matte Slate, Titanium White.
+       Zero orange. Zero toy ornaments. Zero distracting background photos.
+       ========================================================================== */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI Variable", "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SF Mono", Monaco, Menlo, Consolas, monospace;
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 1. DARK OBSIDIAN (Monochrome Minimalist) */
+    [data-theme="dark"] {
+      --bg-canvas: #090a0d;
+      --bg-surface: #101217;
+      --bg-subtle: #161820;
+      --bg-input: #12141a;
+      --border-quiet: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.16);
+      --border-focus: rgba(255, 255, 255, 0.35);
+
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+      --text-faint: #52525b;
+
+      --btn-solid-bg: #ffffff;
+      --btn-solid-text: #090a0d;
+      --btn-solid-hover: #e4e4e7;
+
+      --switch-track: rgba(255, 255, 255, 0.14);
+      --switch-active: #ffffff;
+      --switch-thumb: #090a0d;
+
+      --blueprint-cyan: #38bdf8;
+      --grid-line: rgba(255, 255, 255, 0.025);
+      --shadow-elevation: 0 12px 36px -8px rgba(0, 0, 0, 0.65);
+    }
+
+    /* 2. LIGHT GALLERY (Museum Paper Minimalist) */
+    [data-theme="light"] {
+      --bg-canvas: #fbfbfa;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f4f4f2;
+      --bg-input: #f0f0ed;
+      --border-quiet: rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(0, 0, 0, 0.16);
+      --border-focus: rgba(0, 0, 0, 0.35);
+
+      --text-main: #090a0d;
+      --text-muted: #52525b;
+      --text-dim: #71717a;
+      --text-faint: #a1a1aa;
+
+      --btn-solid-bg: #090a0d;
+      --btn-solid-text: #ffffff;
+      --btn-solid-hover: #27272a;
+
+      --switch-track: rgba(0, 0, 0, 0.14);
+      --switch-active: #090a0d;
+      --switch-thumb: #ffffff;
+
+      --blueprint-cyan: #0284c7;
+      --grid-line: rgba(0, 0, 0, 0.025);
+      --shadow-elevation: 0 12px 36px -8px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: background-color 0.3s var(--spring), color 0.3s var(--spring);
+    }
+
+    /* Subdued architectural drafting grid */
+    .architectural-ground-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ==========================================================================
+       TOP ARCHITECTURAL BAR
+       Monochrome, serene, zero colored traffic lights.
+       ========================================================================== */
+    .app-topbar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-quiet);
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .brand-mark::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--text-main);
+      border-radius: 1px;
+    }
+
+    .brand-text {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .brand-primary {
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--text-main);
+    }
+    .brand-separator {
+      color: var(--text-faint);
+      font-weight: 300;
+    }
+    .brand-sub {
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-minimal-toggle {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      color: var(--text-muted);
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-minimal-toggle:hover {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border-color: var(--border-hover);
+    }
+
+    /* ==========================================================================
+       TWO-COLUMN WORKSPACE
+       Left: Inspector (Options, Destination). Right: Stage (Search, Dossier, Progress)
+       ========================================================================== */
+    .workspace-frame {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 48px);
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* LEFT INSPECTOR SIDEBAR */
+    .inspector-sidebar {
+      width: 300px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-quiet);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      gap: 24px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar-header-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+
+    /* Minimalist Select Dropdown */
+    .minimal-select {
+      height: 38px;
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-quiet);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 14px;
+      transition: border-color 0.2s ease;
+    }
+    .minimal-select:focus {
+      border-color: var(--border-focus);
+    }
+    .minimal-select option {
+      background: var(--bg-surface);
+      color: var(--text-main);
+    }
+
+    /* Minimalist Filter Box & Clean Toggles */
+    .filter-panel-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .clean-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .toggle-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .toggle-sub {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    /* Minimalist Flat Switch */
+    .flat-switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .flat-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .flat-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: var(--switch-track);
+      border-radius: 999px;
+      transition: all 0.25s ease;
+    }
+    .flat-slider::before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      transition: transform 0.25s ease;
+    }
+    .flat-switch input:checked + .flat-slider {
+      background-color: var(--switch-active);
+    }
+    .flat-switch input:checked + .flat-slider::before {
+      background-color: var(--switch-thumb);
+      transform: translateX(16px);
+    }
+
+    /* Destination Folder Box */
+    .folder-path-display {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      border: 1px solid var(--border-quiet);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .folder-actions-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-folder-action {
+      flex: 1;
+      height: 32px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-folder-action:hover {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border-color: var(--border-hover);
+    }
+
+    /* ==========================================================================
+       RIGHT MAIN STAGE
+       Clean, spacious, unencumbered architectural canvas.
+       ========================================================================== */
+    .main-stage {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 40px 140px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      position: relative;
+    }
+
+    /* Spotlight Input Bar */
+    .spotlight-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-quiet);
+      border-radius: 12px;
+      padding: 6px 8px 6px 14px;
+      box-shadow: var(--shadow-elevation);
+      transition: border-color 0.2s ease;
+    }
+    .spotlight-bar:focus-within {
+      border-color: var(--border-focus);
+    }
+
+    .spotlight-icon {
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+    }
+
+    .spotlight-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .spotlight-input::placeholder {
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    .spotlight-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-paste-chip {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    .btn-paste-chip:hover {
+      color: var(--text-main);
+      border-color: var(--border-hover);
+    }
+
+    .btn-analyze-solid {
+      background: var(--btn-solid-bg);
+      color: var(--btn-solid-text);
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-analyze-solid:hover:not(:disabled) {
+      background: var(--btn-solid-hover);
+    }
+    .btn-analyze-solid:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .btn-analyze-solid:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .spinner-disc {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       EMPTY STATE
+       Serene, quiet, pure architectural whitespace.
+       ========================================================================== */
+    .empty-state-frame {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 420px;
+      padding: 40px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-quiet);
+      border-radius: 16px;
+      gap: 16px;
+    }
+
+    .empty-icon-glyph {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--border-quiet);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .empty-state-frame h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+
+    .empty-state-frame p {
+      max-width: 460px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .features-quiet-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .feature-quiet-item {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-dim);
+      padding: 4px 10px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 6px;
+    }
+
+    /* ==========================================================================
+       LOADED PROJECT DOSSIER
+       Editorial architectural presentation. Form follows content.
+       ========================================================================== */
+    .project-dossier-card {
+      display: none;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-quiet);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--shadow-elevation);
+      animation: fadeInDossier 0.3s var(--spring);
+    }
+    @keyframes fadeInDossier {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dossier-split-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 32px;
+    }
+
+    /* Cover Frame */
+    .dossier-cover-container {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+      background: var(--bg-input);
+      border: 1px solid var(--border-quiet);
+      cursor: zoom-in;
+    }
+
+    .dossier-cover-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .dossier-cover-container:hover .dossier-cover-image {
+      transform: scale(1.02);
+    }
+
+    .zoom-hint-chip {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      pointer-events: none;
+    }
+
+    /* Editorial Column */
+    .dossier-editorial-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dossier-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      color: var(--text-main);
+    }
+
+    .dossier-byline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* Architectural Metadata Badges */
+    .spec-badges-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .spec-badge-unit {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Numbers Strip (Plans, Photos, Total) */
+    .counters-data-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 10px;
+      padding: 12px 18px;
+    }
+
+    .counter-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .counter-block:not(:first-child) {
+      border-left: 1px solid var(--border-quiet);
+      padding-left: 18px;
+    }
+    .counter-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+    .counter-value {
+      font-size: 22px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+    .counter-value.cyan-accent {
+      color: var(--blueprint-cyan);
+    }
+
+    /* Bilingual Memoria Descriptiva */
+    .memoria-container-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .memoria-header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-quiet);
+      background: var(--bg-input);
+    }
+
+    .segmented-tabs-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .segment-button {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .segment-button.active {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .memoria-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-copy-action {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-quiet);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    .btn-copy-action:hover:not(:disabled) {
+      color: var(--text-main);
+      border-color: var(--border-hover);
+    }
+    .btn-copy-action:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .memoria-scroll-content {
+      padding: 16px;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-height: 190px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      user-select: text;
+    }
+
+    /* ==========================================================================
+       BOTTOM DOCKED ACTION BAR (PROGRESS & DOWNLOAD)
+       Quiet, docked, precision progress.
+       ========================================================================== */
+    .bottom-dock-bar {
+      position: fixed;
+      bottom: 24px;
+      left: calc(300px + 32px);
+      right: 32px;
+      max-width: 920px;
+      margin: 0 auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-quiet);
+      border-radius: 14px;
+      box-shadow: var(--shadow-elevation);
+      padding: 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 40;
+    }
+
+    .dock-progress-track {
+      width: 100%;
+      height: 4px;
+      background: var(--border-quiet);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .dock-progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: var(--text-main);
+      transition: width 0.25s ease-out;
+    }
+
+    .dock-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .dock-status-text {
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 75%;
+    }
+
+    .dock-percent-text {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .dock-buttons-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-download-primary {
+      flex: 1;
+      height: 40px;
+      background: var(--btn-solid-bg);
+      color: var(--btn-solid-text);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-download-primary:hover:not(:disabled) {
+      background: var(--btn-solid-hover);
+    }
+    .btn-download-primary:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .btn-download-primary:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-cancel-secondary {
+      height: 40px;
+      padding: 0 16px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-cancel-secondary:hover:not(:disabled) {
+      color: var(--text-main);
+      border-color: var(--border-hover);
+    }
+    .btn-cancel-secondary:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Lightbox Modal */
+    .lightbox-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    .lightbox-frame {
+      position: relative;
+      max-width: 92vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .lightbox-frame img {
+      max-width: 92vw;
+      max-height: 90vh;
+      display: block;
+      object-fit: contain;
+    }
+    .lightbox-close-icon {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       MINIMALIST IN-APP DIALOG (WINDOWS 11 / ARCHITECTURAL MODAL)
+       Replaces browser alert() and confirm() entirely. Zero IP address popups.
+       ========================================================================== */
+    .dialog-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: dialogZoomIn 0.2s var(--spring);
+    }
+    @keyframes dialogZoomIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .dialog-modal-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-quiet);
+      border-radius: 12px;
+      box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .dialog-header-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px 14px 24px;
+    }
+
+    .dialog-icon-glyph {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-quiet);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      flex-shrink: 0;
+    }
+    .dialog-icon-glyph.success {
+      color: #10b981;
+    }
+    .dialog-icon-glyph.error {
+      color: #ef4444;
+    }
+
+    .dialog-title-text {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+
+    .dialog-body-area {
+      padding: 0 24px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dialog-message-text {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-muted);
+    }
+
+    .dialog-path-box {
+      display: none;
+      background: var(--bg-input);
+      border: 1px solid var(--border-quiet);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      word-break: break-all;
+      user-select: text;
+    }
+
+    .dialog-footer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 24px;
+      background: var(--bg-subtle);
+      border-top: 1px solid var(--border-quiet);
+    }
+
+    .btn-dialog-cancel {
+      height: 36px;
+      padding: 0 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-quiet);
+      border-radius: 7px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-dialog-cancel:hover {
+      color: var(--text-main);
+      border-color: var(--border-hover);
+    }
+
+    .btn-dialog-confirm {
+      height: 36px;
+      padding: 0 18px;
+      background: var(--btn-solid-bg);
+      color: var(--btn-solid-text);
+      border: none;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-dialog-confirm:hover {
+      background: var(--btn-solid-hover);
+    }
+  </style>
+</head>
+<body>
+  <!-- Subdued architectural drafting grid -->
+  <div class="architectural-ground-grid"></div>
+
+  <!-- TOP BAR (Monochrome, sleek, zero colored traffic lights) -->
+  <header class="app-topbar">
+    <div class="brand-cluster">
+      <div class="brand-mark"></div>
+      <div class="brand-text">
+        <span class="brand-primary">ARCHDAILY</span>
+        <span class="brand-separator">/</span>
+        <span class="brand-sub">Studio Downloader</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="btn-minimal-toggle" onclick="toggleTheme()" title="Cambiar tema">
+        <span id="themeEmoji">🌙</span>
+        <span id="themeLabel">Oscuro</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <div class="workspace-frame">
+
+    <!-- LEFT INSPECTOR SIDEBAR -->
+    <aside class="inspector-sidebar">
+
+      <!-- Resolution -->
+      <div class="sidebar-section">
+        <span class="sidebar-header-label">Resolución Óptica</span>
+        <select class="minimal-select" id="qualitySelect">
+          <option value="original" selected>Ultra-HD Original (Máxima Calidad)</option>
+          <option value="large">Gran Formato (2000px)</option>
+          <option value="medium">Formato Medio (1200px)</option>
+          <option value="screen">Resolución de Pantalla (800px)</option>
+        </select>
+      </div>
+
+      <!-- Separation Filters -->
+      <div class="sidebar-section">
+        <span class="sidebar-header-label">Filtros de Exportación</span>
+        <div class="filter-panel-box">
+          <div class="clean-toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-label">Planos y Dibujos</span>
+              <span class="toggle-sub">01_Planos_y_Dibujos</span>
+            </div>
+            <label class="flat-switch">
+              <input type="checkbox" id="chkPlans" checked>
+              <span class="flat-slider"></span>
+            </label>
+          </div>
+
+          <div class="clean-toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-label">Fotografías</span>
+              <span class="toggle-sub">02_Fotografias</span>
+            </div>
+            <label class="flat-switch">
+              <input type="checkbox" id="chkPhotos" checked>
+              <span class="flat-slider"></span>
+            </label>
+          </div>
+
+          <div class="clean-toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-label">Subcarpetas Separadas</span>
+              <span class="toggle-sub">Estructura editorial</span>
+            </div>
+            <label class="flat-switch">
+              <input type="checkbox" id="chkSeparate" checked>
+              <span class="flat-slider"></span>
+            </label>
+          </div>
+
+          <div class="clean-toggle-row">
+            <div class="toggle-meta">
+              <span class="toggle-label">Dossier y Memoria</span>
+              <span class="toggle-sub">JSON + Texto bilingüe</span>
+            </div>
+            <label class="flat-switch">
+              <input type="checkbox" id="chkDossier" checked>
+              <span class="flat-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Destination Directory -->
+      <div class="sidebar-section">
+        <span class="sidebar-header-label">Directorio de Entrega</span>
+        <div class="filter-panel-box">
+          <div class="folder-path-display" id="folderPathDisplay">Downloads/ArchDaily_Studio</div>
+          <div class="folder-actions-row">
+            <button class="btn-folder-action" onclick="browseFolder()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Cambiar</span>
+            </button>
+            <button class="btn-folder-action" onclick="openCurrentFolder()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+              <span>Abrir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT MAIN STAGE -->
+    <main class="main-stage">
+
+      <!-- Spotlight Input Bar -->
+      <div class="spotlight-bar">
+        <div class="spotlight-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          class="spotlight-input" 
+          id="urlInput" 
+          placeholder="Pega la URL o código del proyecto de ArchDaily..." 
+          autocomplete="off" 
+          spellcheck="false"
+        />
+        <div class="spotlight-actions">
+          <button class="btn-paste-chip" onclick="pasteClipboard()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Pegar</span>
+          </button>
+          <button class="btn-analyze-solid" id="fetchBtn" onclick="fetchProject()">
+            <div class="spinner-disc" id="fetchSpinner"></div>
+            <span id="fetchBtnText">Analizar Proyecto</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state-frame" id="emptyStateFrame">
+        <div class="empty-icon-glyph">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+        </div>
+        <h2>Estudio de Arquitectura</h2>
+        <p>
+          Ingresa cualquier URL de ArchDaily para indexar los planos en máxima resolución original, 
+          separar las fotografías de obra y traducir automáticamente la memoria descriptiva al español.
+        </p>
+        <div class="features-quiet-row">
+          <span class="feature-quiet-item">Planos en Ultra-HD original</span>
+          <span class="feature-quiet-item">Separación automática 01_Planos y 02_Fotos</span>
+          <span class="feature-quiet-item">Memoria técnica bilingüe</span>
+        </div>
+      </div>
+
+      <!-- Loaded Project Dossier -->
+      <div class="project-dossier-card" id="projectDossierCard">
+        <div class="dossier-split-layout">
+          <!-- Left Cover Frame -->
+          <div class="dossier-cover-container" onclick="openLightbox()">
+            <img class="dossier-cover-image" id="coverImg" src="" alt="Portada del Proyecto" />
+            <div class="zoom-hint-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>Ver ampliado</span>
+            </div>
+          </div>
+
+          <!-- Right Editorial Column -->
+          <div class="dossier-editorial-col">
+            <h1 class="dossier-title" id="projTitle">Nombre del Edificio</h1>
+            <div class="dossier-byline" id="projArchitects">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Estudio de Arquitectura</span>
+            </div>
+
+            <!-- Metadata Badges -->
+            <div class="spec-badges-list" id="specBadges"></div>
+
+            <!-- Numbers Strip (Plans, Photos, Total) -->
+            <div class="counters-data-strip">
+              <div class="counter-block">
+                <span class="counter-label">Planos y Cortes</span>
+                <span class="counter-value cyan-accent" id="plansCount">0</span>
+              </div>
+              <div class="counter-block">
+                <span class="counter-label">Fotografías</span>
+                <span class="counter-value" id="photosCount">0</span>
+              </div>
+              <div class="counter-block">
+                <span class="counter-label">Total Archivos</span>
+                <span class="counter-value" id="totalCount">0</span>
+              </div>
+            </div>
+
+            <!-- Bilingual Memoria Descriptiva -->
+            <div class="memoria-container-card">
+              <div class="memoria-header-nav">
+                <div class="segmented-tabs-group">
+                  <button class="segment-button active" id="tabEs" onclick="switchDescTab('es')">
+                    Español
+                  </button>
+                  <button class="segment-button" id="tabOrig" onclick="switchDescTab('orig')">
+                    Original
+                  </button>
+                </div>
+                <div class="memoria-actions-group">
+                  <button class="btn-copy-action" id="btnTranslateAction" onclick="manualTranslate()" title="Traducir descripción al español">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="2" y1="12" x2="22" y2="12"></line>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                    <span id="translateLabel">Traducir</span>
+                  </button>
+                  <button class="btn-copy-action" onclick="copyDescription()" title="Copiar texto actual">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span id="copyLabel">Copiar</span>
+                  </button>
+                </div>
+              </div>
+              <div class="memoria-scroll-content" id="descPanel">
+                Cargando memoria descriptiva...
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- BOTTOM DOCKED ACTION BAR (PROGRESS & DOWNLOAD) -->
+    <div class="bottom-dock-bar">
+      <div class="dock-progress-track">
+        <div class="dock-progress-fill" id="progressBar"></div>
+      </div>
+      <div class="dock-status-row">
+        <span class="dock-status-text" id="statusText">Esperando proyecto para comenzar...</span>
+        <span class="dock-percent-text" id="pctBadge">0%</span>
+      </div>
+      <div class="dock-buttons-row">
+        <button class="btn-download-primary" id="downloadBtn" onclick="startDownload()" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Descargar Proyecto Completo</span>
+        </button>
+        <button class="btn-cancel-secondary" id="cancelBtn" onclick="cancelDownload()" disabled>
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox-modal-backdrop" id="lightboxBackdrop" onclick="closeLightbox(event)">
+    <div class="lightbox-frame">
+      <div class="lightbox-close-icon" onclick="closeLightbox(event)">✕</div>
+      <img id="lightboxImg" src="" alt="Vista ampliada" />
+    </div>
+  </div>
+
+  <!-- Custom Minimalist In-App Dialog (Windows 11 / Architectural Style) -->
+  <div class="dialog-modal-backdrop" id="appDialogBackdrop">
+    <div class="dialog-modal-card">
+      <div class="dialog-header-area">
+        <div class="dialog-icon-glyph" id="dialogIcon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        </div>
+        <div class="dialog-title-text" id="dialogTitle">Aviso</div>
+      </div>
+      <div class="dialog-body-area">
+        <div class="dialog-message-text" id="dialogMessage">Mensaje del sistema</div>
+        <div class="dialog-path-box" id="dialogPathBox"></div>
+      </div>
+      <div class="dialog-footer-actions">
+        <button class="btn-dialog-cancel" id="dialogCancelBtn" onclick="closeAppDialog(false)">Cancelar</button>
+        <button class="btn-dialog-confirm" id="dialogConfirmBtn" onclick="closeAppDialog(true)">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentHeroUrl = "";
+    let isDownloading = false;
+    let descriptionEs = "";
+    let descriptionOrig = "";
+    let activeTab = "es";
+    let dialogCallback = null;
+
+    // Custom Minimalist Modal Controller (Zero browser alert/confirm)
+    function showAppDialog({ title, message, path = "", type = "info", confirmText = "Aceptar", cancelText = "Cancelar", onConfirm = null }) {
+      dialogCallback = onConfirm;
+
+      document.getElementById('dialogTitle').textContent = title;
+      document.getElementById('dialogMessage').textContent = message;
+
+      const pathEl = document.getElementById('dialogPathBox');
+      if (path) {
+        pathEl.textContent = path;
+        pathEl.style.display = 'block';
+      } else {
+        pathEl.style.display = 'none';
+      }
+
+      const iconEl = document.getElementById('dialogIcon');
+      iconEl.className = 'dialog-icon-glyph ' + type;
+      if (type === 'success') {
+        iconEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      } else if (type === 'error') {
+        iconEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        iconEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+      }
+
+      const cancelBtn = document.getElementById('dialogCancelBtn');
+      if (cancelText) {
+        cancelBtn.textContent = cancelText;
+        cancelBtn.style.display = 'inline-block';
+      } else {
+        cancelBtn.style.display = 'none';
+      }
+
+      const confirmBtn = document.getElementById('dialogConfirmBtn');
+      confirmBtn.textContent = confirmText;
+
+      document.getElementById('appDialogBackdrop').style.display = 'flex';
+    }
+
+    function closeAppDialog(isConfirm) {
+      document.getElementById('appDialogBackdrop').style.display = 'none';
+      if (isConfirm && typeof dialogCallback === 'function') {
+        dialogCallback();
+      }
+      dialogCallback = null;
+    }
+
+    // Keyboard support for custom modal
+    window.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('appDialogBackdrop');
+      if (modal && modal.style.display === 'flex') {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeAppDialog(false);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          closeAppDialog(true);
+        }
+      }
+    });
+
+    // Minimalist Theme Switcher
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('arch_minimal_theme', next);
+      updateThemeDisplay(next);
+    }
+
+    function updateThemeDisplay(theme) {
+      const emoji = document.getElementById('themeEmoji');
+      const label = document.getElementById('themeLabel');
+      if (theme === 'dark') {
+        emoji.textContent = '🌙';
+        label.textContent = 'Oscuro';
+      } else {
+        emoji.textContent = '☀️';
+        label.textContent = 'Claro';
+      }
+    }
+
+    const savedTheme = localStorage.getItem('arch_minimal_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeDisplay(savedTheme);
+
+    // Enter trigger for search
+    document.getElementById('urlInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') fetchProject();
+    });
+
+    // Native Bridge Init
+    async function initBridge() {
+      if (window.pywebview && window.pywebview.api) {
+        const dest = await window.pywebview.api.get_default_folder();
+        document.getElementById('folderPathDisplay').textContent = dest;
+      }
+    }
+    window.addEventListener('pywebviewready', initBridge);
+    window.addEventListener('DOMContentLoaded', initBridge);
+
+    // Clipboard Paste
+    async function pasteClipboard() {
+      try {
+        if (window.pywebview && window.pywebview.api) {
+          const text = await window.pywebview.api.get_clipboard();
+          if (text) document.getElementById('urlInput').value = text;
+        } else {
+          const text = await navigator.clipboard.readText();
+          if (text) document.getElementById('urlInput').value = text;
+        }
+      } catch (e) {
+        console.warn("Clipboard paste error:", e);
+      }
+    }
+
+    // Project Fetching
+    async function fetchProject() {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) {
+        showAppDialog({
+          title: "Enlace Requerido",
+          message: "Por favor introduce una URL o código de proyecto de ArchDaily.",
+          confirmText: "Entendido",
+          cancelText: null
+        });
+        return;
+      }
+
+      const fetchBtn = document.getElementById('fetchBtn');
+      const spinner = document.getElementById('fetchSpinner');
+      const btnText = document.getElementById('fetchBtnText');
+      const statusText = document.getElementById('statusText');
+
+      fetchBtn.disabled = true;
+      spinner.style.display = "block";
+      btnText.textContent = "Analizando...";
+      statusText.textContent = "Conectando con ArchDaily e indexando planos, fotos y traduciendo memoria...";
+
+      try {
+        if (window.pywebview && window.pywebview.api) {
+          const data = await window.pywebview.api.fetch_project_data(url);
+          renderProjectData(data);
+        } else {
+          // Demo simulation
+          setTimeout(() => {
+            renderProjectData({
+              title: "Casa Duas Caixas / remyarchitects",
+              architects: "remyarchitects",
+              location: "Buenos Aires, Argentina",
+              year: "2016",
+              area: "550 m²",
+              category: "Houses",
+              photographs: "Alejandro Peral",
+              plans_count: 3,
+              photos_count: 10,
+              total_count: 13,
+              hero_image_url: "https://images.adsttc.com/media/images/5ec3/3f67/b357/657a/0500/005c/large_jpg/200504_dZwH_Kunstenpand_Hart_van_Zuid.jpg?1589854036",
+              description_es: "La casa se concibe como una superposición de volúmenes puros de hormigón y cristal que capturan la luz y establecen una relación continua con el paisaje...",
+              description_original: "The house is conceived as an overlap of pure concrete and glass volumes that capture light and establish a continuous relationship with the landscape..."
+            });
+          }, 600);
+        }
+      } catch (err) {
+        showAppDialog({
+          title: "Error al Analizar",
+          message: "No se pudo obtener la información del proyecto desde ArchDaily:\n" + err,
+          type: "error",
+          confirmText: "Entendido",
+          cancelText: null
+        });
+        statusText.textContent = "Error al analizar el proyecto.";
+      } finally {
+        fetchBtn.disabled = false;
+        spinner.style.display = "none";
+        btnText.textContent = "Analizar Proyecto";
+      }
+    }
+
+    function renderProjectData(data) {
+      document.getElementById('emptyStateFrame').style.display = "none";
+      const card = document.getElementById('projectDossierCard');
+      card.style.display = "block";
+
+      document.getElementById('projTitle').textContent = data.title;
+      document.getElementById('projArchitects').querySelector('span').textContent = data.architects || "Arquitectos no especificados";
+
+      currentHeroUrl = data.hero_image_url || "";
+      if (currentHeroUrl) {
+        document.getElementById('coverImg').src = currentHeroUrl;
+      }
+
+      // Metadata Badges
+      const pillsContainer = document.getElementById('specBadges');
+      pillsContainer.innerHTML = "";
+
+      function makeBadge(icon, text) {
+        if (!text) return;
+        const d = document.createElement('div');
+        d.className = 'spec-badge-unit';
+        d.innerHTML = `<span>${icon}</span> <span>${text}</span>`;
+        pillsContainer.appendChild(d);
+      }
+
+      makeBadge("🏛", data.category);
+      makeBadge("📍", data.location);
+      makeBadge("📅", data.year);
+      makeBadge("📐", data.area);
+      makeBadge("📷", data.photographs);
+
+      // Counters
+      document.getElementById('plansCount').textContent = data.plans_count;
+      document.getElementById('photosCount').textContent = data.photos_count;
+      document.getElementById('totalCount').textContent = data.total_count;
+
+      // Descriptions
+      descriptionEs = data.description_es || data.description_original || "Sin memoria descriptiva disponible.";
+      descriptionOrig = data.description_original || data.description_es || "Sin memoria descriptiva disponible.";
+
+      switchDescTab('es');
+
+      // Enable Download
+      document.getElementById('downloadBtn').disabled = false;
+      document.getElementById('statusText').textContent = `Proyecto listo: ${data.total_count} archivos (${data.plans_count} planos, ${data.photos_count} fotos).`;
+      document.getElementById('pctBadge').textContent = "0%";
+      document.getElementById('progressBar').style.width = "0%";
+    }
+
+    function switchDescTab(lang) {
+      activeTab = lang;
+      const tabEs = document.getElementById('tabEs');
+      const tabOrig = document.getElementById('tabOrig');
+      const panel = document.getElementById('descPanel');
+
+      if (lang === 'es') {
+        tabEs.classList.add('active');
+        tabOrig.classList.remove('active');
+        panel.textContent = descriptionEs;
+      } else {
+        tabOrig.classList.add('active');
+        tabEs.classList.remove('active');
+        panel.textContent = descriptionOrig;
+      }
+    }
+
+    function copyDescription() {
+      const text = activeTab === 'es' ? descriptionEs : descriptionOrig;
+      if (!text) return;
+      navigator.clipboard.writeText(text);
+      const label = document.getElementById('copyLabel');
+      label.textContent = "Copiado";
+      setTimeout(() => label.textContent = "Copiar", 1500);
+    }
+
+    async function manualTranslate() {
+      const textToTranslate = descriptionOrig || descriptionEs;
+      if (!textToTranslate || textToTranslate.trim() === "Sin memoria descriptiva disponible." || textToTranslate.trim() === "Cargando memoria descriptiva...") {
+        showAppDialog({
+          title: "Memoria Descriptiva",
+          message: "No hay texto disponible para traducir en este proyecto.",
+          type: "info",
+          confirmText: "Entendido",
+          cancelText: ""
+        });
+        return;
+      }
+
+      const btn = document.getElementById('btnTranslateAction');
+      const label = document.getElementById('translateLabel');
+      btn.disabled = true;
+      label.textContent = "Traduciendo...";
+      const prevStatus = document.getElementById('statusText').textContent;
+      document.getElementById('statusText').textContent = "Traduciendo memoria descriptiva al español...";
+
+      try {
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.translate_custom_text) {
+          const res = await window.pywebview.api.translate_custom_text(textToTranslate, 'es');
+          if (res && res.trim()) {
+            descriptionEs = res.trim();
+            switchDescTab('es');
+            label.textContent = "¡Traducido!";
+            document.getElementById('statusText').textContent = "Memoria descriptiva traducida exitosamente al español.";
+          } else {
+            label.textContent = "Reintentar";
+            document.getElementById('statusText').textContent = "No se pudo traducir el texto.";
+          }
+        } else {
+          label.textContent = "¡Traducido!";
+          switchDescTab('es');
+        }
+      } catch (err) {
+        console.error("Translation error:", err);
+        label.textContent = "Error";
+        document.getElementById('statusText').textContent = "Error al comunicarse con el motor de traducción.";
+      } finally {
+        setTimeout(() => {
+          btn.disabled = false;
+          label.textContent = "Traducir";
+          document.getElementById('statusText').textContent = prevStatus;
+        }, 2500);
+      }
+    }
+
+    function openLightbox() {
+      if (!currentHeroUrl) return;
+      document.getElementById('lightboxImg').src = currentHeroUrl;
+      document.getElementById('lightboxBackdrop').style.display = "flex";
+    }
+
+    function closeLightbox(e) {
+      if (e.target.id === 'lightboxBackdrop' || e.target.classList.contains('lightbox-close-icon')) {
+        document.getElementById('lightboxBackdrop').style.display = "none";
+      }
+    }
+
+    async function browseFolder() {
+      if (window.pywebview && window.pywebview.api) {
+        const folder = await window.pywebview.api.select_folder();
+        if (folder) document.getElementById('folderPathDisplay').textContent = folder;
+      }
+    }
+
+    async function openCurrentFolder() {
+      const folder = document.getElementById('folderPathDisplay').textContent;
+      if (window.pywebview && window.pywebview.api) {
+        await window.pywebview.api.open_folder(folder);
+      }
+    }
+
+    async function startDownload() {
+      if (isDownloading) return;
+      isDownloading = true;
+
+      document.getElementById('downloadBtn').disabled = true;
+      document.getElementById('cancelBtn').disabled = false;
+      document.getElementById('fetchBtn').disabled = true;
+
+      const opts = {
+        quality: document.getElementById('qualitySelect').value,
+        download_plans: document.getElementById('chkPlans').checked,
+        download_photos: document.getElementById('chkPhotos').checked,
+        separate_folders: document.getElementById('chkSeparate').checked,
+        save_dossier: document.getElementById('chkDossier').checked,
+        dest_folder: document.getElementById('folderPathDisplay').textContent
+      };
+
+      if (window.pywebview && window.pywebview.api) {
+        await window.pywebview.api.start_download(opts);
+      }
+    }
+
+    async function cancelDownload() {
+      if (window.pywebview && window.pywebview.api) {
+        await window.pywebview.api.cancel_download();
+      }
+    }
+
+    // Python Bridge Callbacks
+    window.onProgress = function(data) {
+      document.getElementById('progressBar').style.width = data.percent + '%';
+      document.getElementById('pctBadge').textContent = Math.round(data.percent) + '%';
+      document.getElementById('statusText').textContent = `Descargando [${data.current}/${data.total}]: ${data.filename}`;
+    };
+
+    window.onStatus = function(msg) {
+      document.getElementById('statusText').textContent = msg;
+    };
+
+    window.onDownloadFinished = function(outDir) {
+      isDownloading = false;
+      document.getElementById('downloadBtn').disabled = false;
+      document.getElementById('cancelBtn').disabled = true;
+      document.getElementById('fetchBtn').disabled = false;
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('pctBadge').textContent = '100%';
+      document.getElementById('statusText').textContent = 'Descarga completada con éxito.';
+
+      showAppDialog({
+        title: "Descarga Completada",
+        message: "El proyecto se ha descargado y organizado con éxito en la siguiente ubicación:",
+        path: outDir,
+        type: "success",
+        confirmText: "Abrir Carpeta",
+        cancelText: "Cerrar",
+        onConfirm: () => {
+          if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.open_folder(outDir);
+          }
+        }
+      });
+    };
+
+    window.onDownloadError = function(err) {
+      isDownloading = false;
+      document.getElementById('downloadBtn').disabled = false;
+      document.getElementById('cancelBtn').disabled = true;
+      document.getElementById('fetchBtn').disabled = false;
+      showAppDialog({
+        title: "Error de Descarga",
+        message: "Se produjo un error durante el proceso de descarga:\n" + err,
+        type: "error",
+        confirmText: "Entendido",
+        cancelText: null
+      });
+    };
+  </script>
+</body>
+</html>

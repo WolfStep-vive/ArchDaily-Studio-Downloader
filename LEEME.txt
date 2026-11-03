@@ -1,0 +1,32 @@
+﻿=====================================================
+ ARCHDAILY STUDIO DOWNLOADER - EDICION PORTABLE v1.0
+ Herramienta de investigacion y archivo para Arquitectos
+=====================================================
+
+DESCRIPCION:
+ArchDaily Studio Downloader permite descargar planos en alta
+resolucion, fotografias de obra clasificadas y la memoria descriptiva
+bilingue (original y traducida al espanol) de cualquier proyecto.
+
+CARACTERISTICAS:
+- 100% Portable (no requiere instalacion previa).
+- Interfaz minimalista inspirada en diseno arquitectonico y Liquid Glass.
+- Traduccion automatica de memorias descriptivas al espanol con boton interactivo.
+- Clasificacion automatica en carpetas: "Planos" y "Fotografias".
+- Genera ficha tecnica y dossier en formato Markdown/Texto.
+
+INSTRUCCIONES DE USO:
+1. Extrae el archivo "ArchDaily_Studio_Downloader.exe" en cualquier carpeta.
+2. Haz doble clic para abrir el programa.
+3. Pega el enlace o codigo de cualquier proyecto de ArchDaily (ej: https://www.archdaily.com/932150/...)
+4. Elige si deseas descargar planos, fotos o ambos, y pulsa "Descargar Proyecto".
+
+AVISO DE SEGURIDAD (Windows SmartScreen):
+Al ser una herramienta independiente de libre distribucion, la primera vez que
+lo abras Windows podria mostrar el mensaje:
+  "Windows protegio su PC"
+Solo debes hacer clic en:
+  1. "Mas informacion"
+  2. "Ejecutar de todas formas"
+
+El programa es 100% seguro, libre de publicidad y no recopila datos personales.
