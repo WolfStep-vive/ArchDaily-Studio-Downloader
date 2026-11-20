@@ -1,4 +1,6 @@
-# Python
+# Allow project screenshots
+!screenshots/
+!screenshots/*.png
 __pycache__/
 *.py[cod]
 *$py.class
@@ -77,3 +79,8 @@ app_gui.py
 *tplink*
 *TP-Link*
 *TL-SG1024D*
+
+# Unignore screenshots folder and assets
+!screenshots/
+!screenshots/**
+!screenshots/*.png

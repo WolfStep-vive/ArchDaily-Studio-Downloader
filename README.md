@@ -8,6 +8,18 @@
 > **Herramienta de investigación y archivo para arquitectos, urbanistas y diseñadores.**
 > Descarga planos en máxima resolución original, clasifica fotografías de obra y traduce automáticamente la memoria descriptiva al español con un clic.
 
+<p align="center">
+  <img src="screenshots/preview_dark.png" alt="ArchDaily Studio Downloader - Vista de Proyecto" width="100%">
+</p>
+
+---
+
+## 🖼️ Vistas de la Aplicación
+
+| Pantalla Principal | Vista de Proyecto y Memoria Traducida |
+| :---: | :---: |
+| ![Inicio](screenshots/preview_home.png) | ![Proyecto](screenshots/preview_dark.png) |
+
 ---
 
 ## ✨ Características Principales
